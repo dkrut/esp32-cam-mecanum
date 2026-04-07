@@ -278,10 +278,37 @@ void model4_func()      // tracking model
 
 void Servo_Move()  //servo
 {
-  MOTORservo.write(angle);
-  if (angle >= 180) angle = 180;
-  if (angle <= 1) angle = 1;
-  delay(10);
+  static uint16_t current_angle = 90;
+  static uint16_t target_angle = 90;
+  static unsigned long last_move_time = 0;
+  const int STEP_DELAY = 10;
+  const int STEP_SIZE = 1;
+  const int HYSTERESIS = 1;
+  
+  uint16_t safe_angle = (angle == 0) ? 1 : angle;
+  if (safe_angle == 255) return;
+  
+  if (safe_angle >= 1 && safe_angle <= 180) {
+    if (abs((int16_t)safe_angle - (int16_t)target_angle) > HYSTERESIS) {
+      target_angle = safe_angle;
+    }
+  }
+  
+  if (current_angle != target_angle) {
+    if (millis() - last_move_time >= STEP_DELAY) {
+      if (current_angle < target_angle) {
+        current_angle++;
+        if (current_angle > target_angle) current_angle = target_angle;
+      } else if (current_angle > target_angle) {
+        current_angle--;
+        if (current_angle < target_angle) current_angle = target_angle;
+      }
+      
+      current_angle = constrain(current_angle, 1, 180);
+      MOTORservo.write(current_angle);
+      last_move_time = millis();
+    }
+  }
 }
 
 void Motor(int Dir, int Speed)      // motor drive
