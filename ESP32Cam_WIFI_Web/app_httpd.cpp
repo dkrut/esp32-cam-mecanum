@@ -272,17 +272,22 @@ static esp_err_t cmd_handler(httpd_req_t *req)
     else if(!strcmp(variable, "model")) 
     {
       txdata[2] = 0;
-      if (val==2)
+      if (val==1 || val==11)
+      {
+        txdata[1] = Model1;
+        Serial.write(txdata, 4);
+      }
+      if (val==2 || val==12)
       {
         txdata[1] = Model2;
         Serial.write(txdata, 4);
       }
-      if (val==3)
+      if (val==3 || val==13)
       {
         txdata[1] = Model3;
         Serial.write(txdata, 4);
       }
-      if (val==4)
+      if (val==4 || val==14)
       {
         txdata[1] = Model4;
         Serial.write(txdata, 4);
@@ -446,253 +451,197 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
 <html>
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-        <title>KUONGSHUN ESP32CAM ROBOT</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+        <title>ESP32-CAM Robot</title>
         <style>
-            *{
-                padding: 0; margin: 0;
-                font-family:monospace;
+            :root {
+                --bg-primary: #1a1a2e;
+                --bg-secondary: #16213e;
+                --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                --accent: #667eea;
+                --accent-secondary: #764ba2;
+                --text-primary: #ffffff;
+                --text-secondary: #888888;
+                --success: #00ff00;
             }
-
-            *{  
-                -webkit-touch-callout:none;  
-                -webkit-user-select:none;  
-                -khtml-user-select:none;  
-                -moz-user-select:none;  
-                -ms-user-select:none;  
-                user-select:none;  
-            }
-
-        canvas {
-        margin: auto;
-        display: block;
-
-        }
-        .tITULO{
-            text-align: center;
-            color: rgb(97, 97, 97);
+            *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;-webkit-touch-callout:none}
+            body{background:var(--bg-gradient);font-family:'Segoe UI',sans-serif;color:var(--text-primary);min-height:100vh;overflow-x:hidden}
             
-        }
-        .LINK{
-            color: red;
-            width: 60px;
-            margin: auto;
-            display: block;
-            font-size: 14px;
-        }
-        .cont_stream{
-            width: 90%;
-            max-width: 700px;
-
-            border: 1px solid red;
-            margin: auto;
-            display:block;
-        }
-        .cont_flex{
-            margin: 20px auto 20px;
-            width: 90%;
-            max-width: 400px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-        }
-        .cont_flex_threebuttom{
-            margin: 20px auto 20px;
-            width: 70%;
-            max-width: 400px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-        }
-        .cont_flex_stream{
-            margin: 20px auto 20px;
-            width: 70%;
-            max-width: 400px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-        }
-        .cont_flex_model{
-            margin: 20px auto 20px;
-            width: 78%;
-            max-width: 400px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-        }
-        .cont_flex_twobuttom{
-            margin: 20px auto 20px;
-            width: 93%;
-            max-width: 400px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-        }
-        .cont_flex button{
-            width: 70px;
-            height: 30px;
-            border: none;
-            background-color: red;
-            border-radius: 10px;
-            color: white;
-        }
-        .cont_flex_stream button{
-            width: 70px;
-            height: 30px;
-            border: none;
-            background-color: green;
-            border-radius: 10px;
-            color: white;
-        }
-        .cont_flex_model button{
-            width: 100px;
-            height: 30px;
-            border: none;
-            background-color: yellow;
-            border-radius: 10px;
-            color: black;
-        }
-        .cont_flex_threebuttom button{
-            width: 70px;
-            height: 30px;
-            border: none;
-            background-color: red;
-            border-radius: 10px;
-            color: white;
-        }
-        .cont_flex_twobuttom button{
-            width: 70px;
-            height: 30px;
-            border: none;
-            background-color: red;
-            border-radius: 10px;
-            color: white;
-        }
-        .cont_flex button:active{
-            background-color: blue;
-        }
-        .cont_flex_twobuttom button:active{
-            background-color: blue;
-        }
-        .cont_flex_threebuttom button:active{
-            background-color: blue;
-        }
-        .cont_flex_model button:active{
-            background-color: blue;
-        }
-
-        input{-webkit-user-select:auto;} 
-        input[type=range]{-webkit-appearance:none;width:300px;height:25px;background:#cecece;cursor:pointer;margin:0}
-        input[type=range]:focus{outline:0}
-        input[type=range]::-webkit-slider-runnable-track{width:100%;height:2px;cursor:pointer;background:#EFEFEF;border-radius:0;border:0 solid #EFEFEF}
-        input[type=range]::-webkit-slider-thumb{border:1px solid rgba(0,0,30,0);height:22px;width:22px;border-radius:50px;background:#ff3034;cursor:pointer;-webkit-appearance:none;margin-top:-10px}
-
+            .header{background:rgba(0,0,0,0.5);padding:6px 12px;display:flex;justify-content:space-between;align-items:center;border-radius:15px;margin-bottom:1px;font-size:11px;font-family:monospace}
+            .status-left{display:flex;align-items:center;gap:4px;font-size:11px}
+            .status-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
+            .mode-right{font-size:11px;font-weight:600;color:#0f0}
+            
+            
+            .video-section{padding:4px;text-align:center}
+            .video-container{position:relative;width:100%;max-width:640px;margin:0 auto;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:4/3;display:none}
+            .video-container.show{display:block}
+            .video-container img{width:100%;height:100%;object-fit:cover}
+            .video-controls{display:flex;justify-content:center;gap:10px;padding:8px;background:rgba(0,0,0,0.6);border-radius:0 0 16px 16px}
+            .btn{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:5px 14px;border-radius:25px;font-size:12px;cursor:pointer;transition:all 0.2s;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+            .btn:active,.btn.active{background:var(--accent)}
+            .btn:active{background:var(--accent);transform:scale(0.95)}
+            .btn.active{background:var(--accent)}
+            
+            .joystick-section{margin-top:-4px;padding:4px 16px;text-align:center}
+            .joystick-area{position:relative;width:220px;height:220px;margin:0 auto;background:rgba(0,0,0,0.4);border-radius:40px;padding:12px;border:2px solid var(--accent)}
+            .direction-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px;height:100%}
+            .grid-cell{background:rgba(255,255,255,0.1);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#eceff8;cursor:pointer;transition:all 0.07s;border:1px solid rgba(255,255,255,0.15);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+            .grid-cell:active,.grid-cell.active{background:var(--accent);color:#fff}
+            .grid-cell.center{background:rgba(0,0,0,0.3);box-shadow:inset 0 0 0 1px var(--accent);cursor:default;color:#666}
+            
+            .turn-btn{position:absolute;width:45px;height:80px;background:linear-gradient(135deg,#f093fb,#f5576c);border:none;color:#fff;border-radius:22px 6px 6px 22px;font-size:11px;font-weight:bold;cursor:pointer;top:50%;transform:translateY(-50%);z-index:5;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2}
+            .turn-btn span{display:block}
+            .turn-btn:active,.turn-btn.active{background:linear-gradient(135deg,#ff6b6b,#ee5a5a);transform:translateY(-50%) translateY(2px)}
+            .turn-btn.left{left:-55px}
+            .turn-btn.right{right:-55px;border-radius:6px 22px 22px 6px}
+            
+            .turn-labels{position:absolute;bottom:5px;left:0;right:0;display:flex;justify-content:space-around}
+            
+            @media(max-width:380px){
+                .settings-section{padding:0 16px 2px}
+                .setting-row{margin-bottom:2px}
+                .joystick-area{width:180px;height:180px;padding:8px;border-radius:30px}
+                .direction-grid{gap:5px}
+                .grid-cell{font-size:1.1rem;border-radius:12px}
+                .turn-btn{width:35px;height:60px;font-size:10px}
+                .turn-btn.left{left:-45px}
+                .turn-btn.right{right:-45px}
+            }
+            
+.settings-section{padding:0 16px 4px}
+            .setting-row{background:rgba(255,255,255,0.08);border-radius:40px;padding:6px 12px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,0.1);margin-bottom:4px}
+            .setting-label{font-size:11px;font-weight:500;width:45px;flex-shrink:0;white-space:nowrap}
+            .setting-slider{flex:1;height:4px;-webkit-appearance:none;background:linear-gradient(90deg,var(--accent),var(--accent-secondary));border-radius:5px}
+            .setting-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:#fff;border-radius:50%;cursor:pointer;border:2px solid var(--accent)}
+            .setting-value{background:rgba(0,0,0,0.5);padding:4px 10px;border-radius:25px;font-size:12px;width:45px;text-align:center}
+            
+            .mode-section{padding:1px 16px 8px}
+            .mode-buttons{display:flex;gap:8px;flex-wrap:wrap}
+            .mode-btn{flex:1;min-width:70px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 4px;border-radius:30px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+            .mode-btn:active,.mode-btn.selected{background:var(--accent);border-color:transparent}
+            
+            @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
         </style>
     </head>
-    <body>
-         
-        <!--  <canvas id="canvas" width="200" height="90"></canvas>  -->
-        <h1 class="tITULO">KUONGSHUN ESP32CAM ROBOT</h1>
-        <!--  <a href="https://www.youtube.com" class="LINK">YOUTUBE</a>  -->
-    
-        <img id="stream" src="" class="cont_stream">      
-
-        <div class="cont_flex_stream">     
-            <button type="button" id="toggle-stream">Start Screen</button> 
-            <button type="button" id="get-still">Pause Screen</button> 
-            <button type="button" id="close-stream">Close Screen</button>
-        </div>
-
-        <!--
-        <div class="cont_flex"><div><input type="checkbox" style="margin-right: 5px;" id="nostop" onclick="var noStop=0;if (this.checked) noStop=1;fetch(document.location.origin+'/control?var=nostop&val='+noStop);">No Stop</div></div>
-        -->
-        
-        <div class="cont_flex_threebuttom">     
-            <button type="button" id="leftup" ontouchstart="fetch(document.location.origin+'/control?var=car&val=6');"ontouchend="fetch(document.location.origin+'/control?var=car&val=3');">Leftup</button>
-            <button type="button" id="forward" ontouchstart="fetch(document.location.origin+'/control?var=car&val=1');"ontouchend="fetch(document.location.origin+'/control?var=car&val=3');">Forward</button>
-            <button type="button" id="rightup" ontouchstart="fetch(document.location.origin+'/control?var=car&val=7');"ontouchend="fetch(document.location.origin+'/control?var=car&val=3');">Rightup</button>
-        </div>
-
-        <div class="cont_flex_twobuttom">     
-            <button type="button" id="turnleft" ontouchstart="fetch(document.location.origin+'/control?var=car&val=4');"ontouchend="fetch(document.location.origin+'/control?var=car&val=3');">TurnLeft</button>
-            <!--    <button type="button" id="Stop" ontouchstart="fetch(document.location.origin+'/control?var=car&val=3');">Stop</button>    -->
-            <button type="button" id="turnright" ontouchstart="fetch(document.location.origin+'/control?var=car&val=2');"ontouchend="fetch(document.location.origin+'/control?var=car&val=3');">TurnRight</button>  
-        </div>
-
-        <div class="cont_flex_threebuttom">     
-            <button type="button" id="leftdown" ontouchstart="fetch(document.location.origin+'/control?var=car&val=8');"ontouchend="fetch(document.location.origin+'/control?var=car&val=3');">Leftdown</button>
-            <button type="button" id="backward" ontouchstart="fetch(document.location.origin+'/control?var=car&val=5');"ontouchend="fetch(document.location.origin+'/control?var=car&val=3');">Backward</button>
-            <button type="button" id="rightdown" ontouchstart="fetch(document.location.origin+'/control?var=car&val=9');"ontouchend="fetch(document.location.origin+'/control?var=car&val=3');">Rightdown</button>
-        </div>
-
-        <div class="cont_flex_twobuttom">     
-            <button type="button" id="clockwise" ontouchstart="fetch(document.location.origin+'/control?var=car&val=10');"ontouchend="fetch(document.location.origin+'/control?var=car&val=3');">Clockwise</button>
-            <button type="button" id="Contrarotate" ontouchstart="fetch(document.location.origin+'/control?var=car&val=15');"ontouchend="fetch(document.location.origin+'/control?var=car&val=3');">Contrarotate</button>  
-        </div>
-
-        <div class="cont_flex_model">     
-            <button type="button" id="model1" onmousedown="fetch(document.location.origin+'/control?var=car&val=11');">Free Control</button>
-            <button type="button" id="model2" onmousedown="fetch(document.location.origin+'/control?var=model&val=2');">Obstacle Avoidance</button>
-        </div>
-
-        <div class="cont_flex_model">     
-            <button type="button" id="model3" onmousedown="fetch(document.location.origin+'/control?var=model&val=3');">Object Following</button>
-            <button type="button" id="model4" onmousedown="fetch(document.location.origin+'/control?var=model&val=4');">Line Tracing</button>
-        </div>
-
-        
-        <div class="cont_flex">  
-            <div style="display: flex;align-items: center;">Servo <input type="range" id="servo" min="0" max="180" value="90" onchange="try{fetch(document.location.origin+'/control?var=servo&val='+this.value);}catch(e){}"></div>
+    <body onload="document.addEventListener('touchend',function(e){if(e.target.classList.contains('grid-cell')||e.target.classList.contains('turn-btn'))release();});document.addEventListener('pointerup',function(e){if(e.target.classList.contains('grid-cell')||e.target.classList.contains('turn-btn'))release();});">
+        <div class="header">
+            <div class="status-left">📡 <span>Connected</span></div>
+            <div class="mode-right" id="current-mode">🎮 Mode: Free Control</div>
         </div>
         
-        <div class="cont_flex">  
-            <div style="display: flex;align-items: center;">Speed <input type="range" id="speed" min="150" max="255" value="220" onchange="try{fetch(document.location.origin+'/control?var=speed&val='+this.value);}catch(e){}"></div>
+        <div class="video-section">
+            <div class="video-container" id="video-container"><img id="stream" src="" alt="Camera"></div>
+            <div class="video-controls">
+                <button class="btn" id="btn-start" oncontextmenu="return false" onclick="startStream()">▶ Start</button>
+                <button class="btn" id="btn-capture" oncontextmenu="return false" onclick="captureFrame()">📸 Snapshot</button>
+                <button class="btn" id="btn-stop" oncontextmenu="return false" onclick="stopStream()">⏹ Stop</button>
+            </div>
         </div>
-        <div class="cont_flex">  
-            <div style="display: flex;align-items: center;">L E D <input type="range" id="flash" min="0" max="255" value="0" onchange="try{fetch(document.location.origin+'/control?var=flash&val='+this.value);}catch(e){}"></div>
+        
+        <div class="settings-section">
+            <div class="setting-row">
+                <span class="setting-label">🔄 Servo</span>
+                <input type="range" class="setting-slider" id="servo" min="0" max="180" value="90" oninput="updateSetting('servo',this.value)">
+                <span class="setting-value" id="servo-val">90</span>
+            </div>
+            <div class="setting-row">
+                <span class="setting-label">⚡ Speed</span>
+                <input type="range" class="setting-slider" id="speed" min="150" max="255" value="220" oninput="updateSetting('speed',this.value)">
+                <span class="setting-value" id="speed-val">220</span>
+            </div>
+            <div class="setting-row">
+                <span class="setting-label">💡 LED</span>
+                <input type="range" class="setting-slider" id="flash" min="0" max="255" value="0" onchange="try{fetch(document.location.origin+'/control?var=flash&val='+this.value);}catch(e){}">
+                <span class="setting-value" id="led-val">0</span>
+            </div>
         </div>
-        <!--
-        <div class="cont_flex">  
-            <div style="display: flex;align-items: center;">Qual. <input type="range" id="quality" min="10" max="63" value="10" onchange="try{fetch(document.location.origin+'/control?var=quality&val='+this.value);}catch(e){}"></div>
+        
+<div class="joystick-section">
+            <div class="joystick-area" oncontextmenu="return false">
+                <div class="direction-grid">
+                    <div class="grid-cell" id="btn-ul" oncontextmenu="return false" ontouchstart="event.preventDefault();press(6)" ontouchend="release()">↖</div>
+                    <div class="grid-cell" id="btn-up" oncontextmenu="return false" ontouchstart="event.preventDefault();press(1)" ontouchend="release()">↑</div>
+                    <div class="grid-cell" id="btn-ur" oncontextmenu="return false" ontouchstart="event.preventDefault();press(7)" ontouchend="release()">↗</div>
+                    <div class="grid-cell" id="btn-left" oncontextmenu="return false" ontouchstart="event.preventDefault();press(4)" ontouchend="release()">←</div>
+                    <div class="grid-cell center" oncontextmenu="return false" ontouchstart="event.preventDefault();release()" ontouchend="release()">⚫</div>
+                    <div class="grid-cell" id="btn-right" oncontextmenu="return false" ontouchstart="event.preventDefault();press(2)" ontouchend="release()">→</div>
+                    <div class="grid-cell" id="btn-dl" oncontextmenu="return false" ontouchstart="event.preventDefault();press(8)" ontouchend="release()">↙</div>
+                    <div class="grid-cell" id="btn-down" oncontextmenu="return false" ontouchstart="event.preventDefault();press(5)" ontouchend="release()">↓</div>
+                    <div class="grid-cell" id="btn-dr" oncontextmenu="return false" ontouchstart="event.preventDefault();press(9)" ontouchend="release()">↘</div>
+                </div>
+                <button class="turn-btn left" id="btn-ccw" oncontextmenu="return false" ontouchstart="event.preventDefault();press(15)" ontouchend="release()"><span>Left</span><span>↺</span></button>
+                <button class="turn-btn right" id="btn-cw" oncontextmenu="return false" ontouchstart="event.preventDefault();press(10)" ontouchend="release()"><span>Right</span><span>↻</span></button>
+            </div>
         </div>
-        <div class="cont_flex">  
-            <div style="display: flex;align-items: center;">Frame <input type="range" id="framesize" min="0" max="5" value="5" onchange="try{fetch(document.location.origin+'/control?var=framesize&val='+this.value);}catch(e){}"></div>
+        
+        <div class="mode-section">
+            <div class="mode-buttons">
+                <button class="mode-btn selected" oncontextmenu="return false" onclick="setMode(1)">Free Control</button>
+                <button class="mode-btn" oncontextmenu="return false" onclick="setMode(2)">Obstacle</button>
+                <button class="mode-btn" oncontextmenu="return false" onclick="setMode(3)">Following</button>
+                <button class="mode-btn" oncontextmenu="return false" onclick="setMode(4)">Line Trace</button>
+            </div>
         </div>
-        -->
-
+        
         <script>
-            window.onload = function(){
-                var canvas = document.getElementById("canvas");
-                var ctx = canvas.getContext("2d");
-
-                ctx.fillStyle = "rgb(255,0,0)";
-                ctx.fillRect(73,25,60,35);
-                ctx.clearRect(78,30,50,25);
-
-                ctx.fillRect(93,20,20,5);
-                ctx.fillRect(68,35,5,15);
-                ctx.fillRect(133,35,5,15);
-
-                ctx.beginPath();
-                ctx.arc(92,42,6,0,2*Math.PI,true);
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.arc(117,42,6,0,2*Math.PI,true);
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.arc(104,100,35,0,Math.PI,true);
-                ctx.fill();
-
-                ctx.clearRect(50,85,100,20);
-
+            const BASE_URL = location.origin;
+            let currentDir = 3;
+            
+            function sendCmd(cmd,val){fetch(`${BASE_URL}/control?var=${cmd}&val=${val}`)}
+            
+            function startStream(){document.getElementById('stream').src=BASE_URL+':81/stream';document.getElementById('video-container').classList.add('show');document.getElementById('btn-start').classList.add('active')}
+            function stopStream(){document.getElementById('stream').src='';document.getElementById('video-container').classList.remove('show');document.querySelectorAll('.video-controls .btn').forEach(b=>b.classList.remove('active'))}
+            function captureFrame(){document.getElementById('stream').src=BASE_URL+'/capture?_cb='+Date.now();document.getElementById('video-container').classList.add('show')}
+            
+            function updateSetting(id,val){
+                document.getElementById(id+'-val').textContent=val;
+                sendCmd(id,val);
             }
-        
-            document.addEventListener(
-            'DOMContentLoaded',function(){
-                function b(B){let C;switch(B.type){case'checkbox':C=B.checked?1:0;break;case'range':case'select-one':C=B.value;break;case'button':case'submit':C='1';break;default:return;}const D=`${c}/control?var=${B.id}&val=${C}`;fetch(D).then(E=>{console.log(`request to ${D} finished, status: ${E.status}`)})}var c=document.location.origin;const e=B=>{B.classList.add('hidden')},f=B=>{B.classList.remove('hidden')},g=B=>{B.classList.add('disabled'),B.disabled=!0},h=B=>{B.classList.remove('disabled'),B.disabled=!1},i=(B,C,D)=>{D=!(null!=D)||D;let E;'checkbox'===B.type?(E=B.checked,C=!!C,B.checked=C):(E=B.value,B.value=C),D&&E!==C?b(B):!D&&('aec'===B.id?C?e(v):f(v):'agc'===B.id?C?(f(t),e(s)):(e(t),f(s)):'awb_gain'===B.id?C?f(x):e(x):'face_recognize'===B.id&&(C?h(n):g(n)))};document.querySelectorAll('.close').forEach(B=>{B.onclick=()=>{e(B.parentNode)}}),fetch(`${c}/status`).then(function(B){return B.json()}).then(function(B){document.querySelectorAll('.default-action').forEach(C=>{i(C,B[C.id],!1)})});const j=document.getElementById('stream'),k=document.getElementById('stream-container'),l=document.getElementById('get-still'),m=document.getElementById('toggle-stream'),n=document.getElementById('face_enroll'),o=document.getElementById('close-stream'),p=()=>{window.stop(),m.innerHTML='Start Screen'},q=()=>{j.src=`${c+':81'}/stream`,f(k),m.innerHTML='Stop Stream'};l.onclick=()=>{p(),j.src=`${c}/capture?_cb=${Date.now()}`,f(k)},o.onclick=()=>{p(),e(k)},m.onclick=()=>{const B='Stop Stream'===m.innerHTML;B?p():q()},n.onclick=()=>{b(n)},document.querySelectorAll('.default-action').forEach(B=>{B.onchange=()=>b(B)});const r=document.getElementById('agc'),s=document.getElementById('agc_gain-group'),t=document.getElementById('gainceiling-group');r.onchange=()=>{b(r),r.checked?(f(t),e(s)):(e(t),f(s))};const u=document.getElementById('aec'),v=document.getElementById('aec_value-group');u.onchange=()=>{b(u),u.checked?e(v):f(v)};const w=document.getElementById('awb_gain'),x=document.getElementById('wb_mode-group');w.onchange=()=>{b(w),w.checked?f(x):e(x)};const y=document.getElementById('face_detect'),z=document.getElementById('face_recognize'),A=document.getElementById('framesize');A.onchange=()=>{b(A),5<A.value&&(i(y,!1),i(z,!1))},y.onchange=()=>{return 5<A.value?(alert('Please select CIF or lower resolution before enabling this feature!'),void i(y,!1)):void(b(y),!y.checked&&(g(n),i(z,!1)))},z.onchange=()=>{return 5<A.value?(alert('Please select CIF or lower resolution before enabling this feature!'),void i(z,!1)):void(b(z),z.checked?(h(n),i(y,!0)):g(n))}});
-        
+            
+            function setMode(val){
+                document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('selected'));
+                document.querySelectorAll('.mode-btn')[val-1].classList.add('selected');
+                const modes=['Free Control','Obstacle','Following','Line Trace'];
+                document.getElementById('current-mode').textContent='🎮 Mode: '+modes[val-1];
+                sendCmd('model',val);
+}
+            
+function press(dir){
+                if(currentDir === 3 && dir !== 3){
+                    document.querySelectorAll('.mode-btn')[0].classList.add('selected');
+                    document.querySelectorAll('.mode-btn').forEach((b,i)=>{if(i>0)b.classList.remove('selected')});
+                    document.getElementById('current-mode').textContent='🎮 Mode: Free Control';
+                }
+                sendCmd('car',dir);
+                currentDir = dir;
+                highlightArrow(dir);
+                if(navigator.vibrate) navigator.vibrate(15);
+            }
+            
+            function release(){
+                sendCmd('car',3);
+                currentDir = 3;
+                clearArrows();
+                if(navigator.vibrate) navigator.vibrate(10);
+            }
+            
+            function highlightArrow(dir){
+                clearArrows();
+                var map = {1:'up',2:'right',4:'left',5:'down',6:'ul',7:'ur',8:'dl',9:'dr',10:'cw',15:'ccw'};
+                var idx = map[dir];
+                if(idx){
+                    var cell = document.getElementById('btn-'+idx);
+                    if(cell) cell.classList.add('active');
+                }
+            }
+            
+            function clearArrows(){
+                var btns = document.querySelectorAll('.grid-cell, .turn-btn');
+                for(var i=0;i<btns.length;i++){
+                    btns[i].classList.remove('active');
+                }
+            }
         </script>
     </body>
 </html>
