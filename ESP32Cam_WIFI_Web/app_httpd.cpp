@@ -1,4 +1,6 @@
 
+#include <WiFi.h>
+#include "esp_wifi.h"
 #include <esp32-hal-ledc.h>
 #include "esp_http_server.h"
 #include "esp_timer.h"
@@ -437,10 +439,18 @@ static esp_err_t status_handler(httpd_req_t *req){
     sensor_t * s = esp_camera_sensor_get();
     char * p = json_response;
     *p++ = '{';
-
-    p+=sprintf(p, "\"framesize\":%u,", s->status.framesize);
-    p+=sprintf(p, "\"quality\":%u,", s->status.quality);
-    *p++ = '}';
+    
+    int rssi = 0;
+    int num = WiFi.softAPgetStationNum();
+    if(num > 0) {
+        wifi_sta_list_t sta;
+        memset(&sta, 0, sizeof(wifi_sta_list_t));
+        esp_wifi_ap_get_sta_list(&sta);
+        if(sta.num > 0) {
+            rssi = (int)sta.sta[0].rssi;
+        }
+    }
+    p+=sprintf(p, "\"rssi\":%d,\"num\":%d,\"framesize\":%u,\"quality\":%u}", rssi, num, s->status.framesize, s->status.quality);
     *p++ = 0;
     httpd_resp_set_type(req, "application/json");
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
@@ -526,7 +536,7 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
     </head>
     <body onload="document.addEventListener('touchend',function(e){if(e.target.classList.contains('grid-cell')||e.target.classList.contains('turn-btn'))release();});document.addEventListener('pointerup',function(e){if(e.target.classList.contains('grid-cell')||e.target.classList.contains('turn-btn'))release();});">
         <div class="header">
-            <div class="status-left">📡 <span>Connected</span></div>
+            <div class="status-left">📡 <span id="rssi-val">...</span></div>
             <div class="mode-right" id="current-mode">🎮 Mode: Free Control</div>
         </div>
         
@@ -587,6 +597,24 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
         <script>
             const BASE_URL = location.origin;
             let currentDir = 3;
+            
+            function updateStatus(){
+                fetch(BASE_URL+'/status').then(r=>r.json()).then(d=>{
+                    var el = document.getElementById('rssi-val');
+                    if(d.rssi && d.rssi > -120) {
+                        el.textContent = 'RSSI ' + d.rssi + ' dBm';
+                        el.style.color = d.rssi > -50 ? '#0f0' : (d.rssi > -70 ? '#ff0' : '#f00');
+                    } else if(d.num > 0) {
+                        el.textContent = 'RSSI no signal';
+                        el.style.color = '#f00';
+                    } else {
+                        el.textContent = '...';
+                        el.style.color = '#fff';
+                    }
+                }).catch(()=>{});
+            }
+            setInterval(updateStatus,5000);
+            updateStatus();
             
             function sendCmd(cmd,val){fetch(`${BASE_URL}/control?var=${cmd}&val=${val}`)}
             
