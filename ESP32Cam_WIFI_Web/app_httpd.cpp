@@ -538,282 +538,295 @@ static esp_err_t wifi_status_handler(httpd_req_t *req){
 static const char PROGMEM INDEX_HTML[] = R"rawliteral(
 <!doctype html>
 <html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>ESP32-CAM Robot</title>
-<style>
-:root{--bg-primary:#1a1a2e;--bg-secondary:#16213e;--bg-gradient:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);--accent:#667eea;--accent-secondary:#764ba2;--text-primary:#fff;--text-secondary:#888;--success:#00ff00}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;-webkit-touch-callout:none}
-body{background:var(--bg-gradient);font-family:'Segoe UI',sans-serif;color:var(--text-primary);min-height:100vh;overflow-x:hidden}
-.header{background:rgba(0,0,0,0.5);padding:6px 12px;display:flex;justify-content:space-between;align-items:center;border-radius:15px;margin-bottom:1px;font-size:11px;font-family:monospace}
-.status-left{display:flex;align-items:center;gap:4px;font-size:11px}
-.status-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
-.mode-right{font-size:11px;font-weight:600;color:#0f0}
-.video-section{padding:4px;text-align:center}
-.video-container{position:relative;width:100%;max-width:640px;margin:0 auto;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:4/3;display:none}
-.video-container.show{display:block}
-.video-container img{width:100%;height:100%;object-fit:cover}
-.video-controls{display:flex;justify-content:center;gap:10px;padding:8px;background:rgba(0,0,0,0.6);border-radius:0 0 16px 16px}
-.btn{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:5px 14px;border-radius:25px;font-size:12px;cursor:pointer;transition:all 0.2s;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.btn:active,.btn.active{background:var(--accent)}
-.btn:active{background:var(--accent);transform:scale(0.95)}
-.btn.active{background:var(--accent)}
-.joystick-section{margin-top:-4px;padding:4px 16px;text-align:center}
-.joystick-area{position:relative;width:220px;height:220px;margin:0 auto;background:rgba(0,0,0,0.4);border-radius:40px;padding:12px;border:2px solid var(--accent)}
-.direction-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px;height:100%}
-.grid-cell{background:rgba(255,255,255,0.1);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#eceff8;cursor:pointer;transition:all 0.07s;border:1px solid rgba(255,255,255,0.15);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
-.grid-cell:active,.grid-cell.active{background:var(--accent);color:#fff}
-.grid-cell.center{background:rgba(0,0,0,0.3);box-shadow:inset 0 0 0 1px var(--accent);cursor:default;color:#666}
-.turn-btn{position:absolute;width:45px;height:80px;background:linear-gradient(135deg,#f093fb,#f5576c);border:none;color:#fff;border-radius:22px 6px 6px 22px;font-size:11px;font-weight:bold;cursor:pointer;top:50%;transform:translateY(-50%);z-index:5;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2}
-.turn-btn span{display:block}
-.turn-btn:active,.turn-btn.active{background:linear-gradient(135deg,#ff6b6b,#ee5a5a);transform:translateY(-50%) translateY(2px)}
-.turn-btn.left{left:-55px}
-.turn-btn.right{right:-55px;border-radius:6px 22px 22px 6px}
-@media(max-width:380px){
-.settings-section{padding:0 16px 2px}
-.setting-row{margin-bottom:2px}
-.joystick-area{width:180px;height:180px;padding:8px;border-radius:30px}
-.direction-grid{gap:5px}
-.grid-cell{font-size:1.1rem;border-radius:12px}
-.turn-btn{width:35px;height:60px;font-size:10px}
-.turn-btn.left{left:-45px}
-.turn-btn.right{right:-45px}
-}
-.settings-section{padding:0 16px 4px}
-.setting-row{background:rgba(255,255,255,0.08);border-radius:40px;padding:6px 12px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,0.1);margin-bottom:4px}
-.setting-label{font-size:11px;font-weight:500;width:45px;flex-shrink:0;white-space:nowrap}
-.setting-slider{flex:1;height:4px;-webkit-appearance:none;background:linear-gradient(90deg,var(--accent),var(--accent-secondary));border-radius:5px}
-.setting-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:#fff;border-radius:50%;cursor:pointer;border:2px solid var(--accent)}
-.setting-value{background:rgba(0,0,0,0.5);padding:4px 10px;border-radius:25px;font-size:12px;width:45px;text-align:center}
-.mode-section{padding:1px 16px 8px}
-.mode-buttons{display:flex;gap:8px;flex-wrap:wrap}
-.mode-btn{flex:1;min-width:70px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 4px;border-radius:30px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.mode-btn:active,.mode-btn.selected{background:var(--accent);border-color:transparent}
-.wifi-section{padding:4px 16px 16px}
-.wifi-section .section-title{font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text-secondary)}
-.wifi-mode-toggle{display:flex;gap:12px}
-.wifi-mode-toggle label{font-size:11px;cursor:pointer}
-.wifi-mode-toggle input{margin-right:4px}
-.wifi-input{flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 10px;border-radius:20px;font-size:11px}
-.wifi-info{font-size:10px;color:var(--text-secondary);margin-top:6px;text-align:center}
-#btn-wifi-save{background:var(--accent);width:100%;margin-top:4px}
-#wifi-sta-fields{display:flex;flex-direction:column;gap:4px}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-</style>
-</head>
-<body>
-<div class="header">
-<div class="status-left">📡 <span id="rssi-val">...</span></div>
-<div class="mode-right" id="current-mode">🎮 Mode: Free Control</div>
-</div>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+        <title>ESP32-CAM Robot</title>
+        <style>
+            :root{--bg-primary:#1a1a2e;--bg-secondary:#16213e;--bg-gradient:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);--accent:#667eea;--accent-secondary:#764ba2;--text-primary:#fff;--text-secondary:#888;--success:#00ff00}
+            *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;-webkit-touch-callout:none}
+            body{background:var(--bg-gradient);font-family:'Segoe UI',sans-serif;color:var(--text-primary);min-height:100vh;overflow-x:hidden;max-width:640px;margin:0 auto;padding:8px}
+            .header{background:rgba(0,0,0,0.5);padding:6px 12px;display:flex;justify-content:space-between;align-items:center;border-radius:15px;margin-bottom:1px;font-size:11px;font-family:monospace}
+            .status-left{display:flex;align-items:center;gap:4px;font-size:11px}
+            .status-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
+            .mode-right{font-size:11px;font-weight:600;color:#0f0}
+            .video-section{padding:4px;text-align:center}
+            .video-container{position:relative;width:100%;max-width:640px;margin:0 auto;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:4/3;display:none}
+            .video-container.show{display:block}
+            .video-container img{width:100%;height:100%;object-fit:cover}
+            .video-controls{display:flex;justify-content:center;gap:10px;padding:8px;background:rgba(0,0,0,0.6);border-radius:16px}
+            .btn{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:5px 14px;border-radius:25px;font-size:12px;cursor:pointer;transition:all 0.2s;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+            .btn:active,.btn.active{background:var(--accent)}
+            .btn:active{background:var(--accent);transform:scale(0.95)}
+            .btn.active{background:var(--accent)}
+            .joystick-section{margin-top:-4px;padding:4px 16px;text-align:center}
+            .joystick-area{position:relative;width:220px;height:220px;margin:0 auto;background:rgba(0,0,0,0.4);border-radius:40px;padding:12px;border:2px solid var(--accent)}
+            .direction-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px;height:100%}
+            .grid-cell{background:rgba(255,255,255,0.1);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#eceff8;cursor:pointer;transition:all 0.07s;border:1px solid rgba(255,255,255,0.15);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+            .grid-cell:active,.grid-cell.active{background:var(--accent);color:#fff}
+            .grid-cell.center{background:rgba(0,0,0,0.3);box-shadow:inset 0 0 0 1px var(--accent);cursor:default;color:#666}
+            .turn-btn{position:absolute;width:45px;height:80px;background:linear-gradient(135deg,#f093fb,#f5576c);border:none;color:#fff;border-radius:22px 6px 6px 22px;font-size:11px;font-weight:bold;cursor:pointer;top:50%;transform:translateY(-50%);z-index:5;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2}
+            .turn-btn span{display:block}
+            .turn-btn:active,.turn-btn.active{background:linear-gradient(135deg,#ff6b6b,#ee5a5a);transform:translateY(-50%) translateY(2px)}
+            .turn-btn.left{left:-55px}
+            .turn-btn.right{right:-55px;border-radius:6px 22px 22px 6px}
+            @media(max-width:380px){
+                .settings-section{padding:0 16px 2px}
+                .setting-row{margin-bottom:2px}
+                .joystick-area{width:180px;height:180px;padding:8px;border-radius:30px}
+                .direction-grid{gap:5px}
+                .grid-cell{font-size:1.1rem;border-radius:12px}
+                .turn-btn{width:35px;height:60px;font-size:10px}
+                .turn-btn.left{left:-45px}
+                .turn-btn.right{right:-45px}
+            }
+            .settings-section{padding:0 16px 4px}
+            .setting-row{background:rgba(255,255,255,0.08);border-radius:40px;padding:6px 12px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,0.1);margin-bottom:4px}
+            .setting-label{font-size:11px;font-weight:500;width:45px;flex-shrink:0;white-space:nowrap}
+            .setting-slider{flex:1;height:4px;-webkit-appearance:none;background:linear-gradient(90deg,var(--accent),var(--accent-secondary));border-radius:5px}
+            .setting-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:#fff;border-radius:50%;cursor:pointer;border:2px solid var(--accent)}
+            .setting-value{background:rgba(0,0,0,0.5);padding:4px 10px;border-radius:25px;font-size:12px;width:45px;text-align:center}
+            .mode-section{padding:1px 16px 8px}
+            .mode-buttons{display:flex;gap:8px;flex-wrap:wrap}
+            .mode-btn{flex:1;min-width:70px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 4px;border-radius:30px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+            .mode-btn:active,.mode-btn.selected{background:var(--accent);border-color:transparent}
+            .wifi-section{padding:4px 16px 16px}
+            .wifi-section .section-title{font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text-secondary)}
+            .wifi-mode-toggle{display:flex;gap:12px}
+            .wifi-mode-toggle label{font-size:11px;cursor:pointer}
+            .wifi-mode-toggle input{margin-right:4px}
+            .wifi-input{flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 10px;border-radius:20px;font-size:11px}
+            .wifi-info{font-size:10px;color:var(--text-secondary);margin-top:6px;text-align:center}
+            #btn-wifi-save{background:var(--accent);width:100%;margin-top:4px}
+            #wifi-sta-fields{display:flex;flex-direction:column}
+            @media(min-width:641px){
+                .header,.video-section,.settings-section,.joystick-section,.mode-section,.wifi-section{padding-left:0;padding-right:0}
+                .header{font-size:13px;padding:8px 16px}
+                .btn{padding:8px 20px;font-size:13px}
+                .setting-row{padding:8px 16px;width:100%;max-width:640px;margin:0 auto 4px}
+                .setting-label{font-size:12px;width:50px}
+                .setting-slider{flex:1}
+                .setting-value{font-size:13px}
+                .mode-btn{font-size:12px;padding:10px 8px}
+                .wifi-section .section-title{font-size:13px}
+                .wifi-mode-toggle label{font-size:12px}
+                .wifi-input{font-size:12px;padding:8px 12px}
+            }
+            @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <div class="status-left">📡 <span id="rssi-val">...</span></div>
+            <div class="mode-right" id="current-mode">🎮 Mode: Free Control</div>
+        </div>
 
-<div class="video-section">
-<div class="video-container" id="video-container"><img id="stream" src="" alt="Camera"></div>
-<div class="video-controls">
-<button class="btn" id="btn-start" onclick="startStream()">▶ Start</button>
-<button class="btn" id="btn-capture" onclick="captureFrame()">📸 Snapshot</button>
-<button class="btn" id="btn-stop" onclick="stopStream()">⏹ Stop</button>
-</div>
-</div>
+        <div class="video-section">
+            <div class="video-container" id="video-container"><img id="stream" src="" alt="Camera"></div>
+            <div class="video-controls">
+                <button class="btn" id="btn-start" onclick="startStream()">▶ Start</button>
+                <button class="btn" id="btn-capture" onclick="captureFrame()">📸 Snapshot</button>
+                <button class="btn" id="btn-stop" onclick="stopStream()">⏹ Stop</button>
+            </div>
+        </div>
 
-<div class="settings-section">
-<div class="setting-row">
-<span class="setting-label">🔄 Servo</span>
-<input type="range" class="setting-slider" id="servo" min="0" max="180" value="90" oninput="updateSetting('servo',this.value)">
-<span class="setting-value" id="servo-val">90</span>
-</div>
-<div class="setting-row">
-<span class="setting-label">⚡ Speed</span>
-<input type="range" class="setting-slider" id="speed" min="150" max="255" value="220" oninput="updateSetting('speed',this.value)">
-<span class="setting-value" id="speed-val">220</span>
-</div>
-<div class="setting-row">
-<span class="setting-label">💡 LED</span>
-<input type="range" class="setting-slider" id="flash" min="0" max="255" value="0" onchange="fetch(document.location.origin+'/control?var=flash&val='+this.value)">
-<span class="setting-value" id="led-val">0</span>
-</div>
-</div>
+        <div class="settings-section">
+            <div class="setting-row">
+                <span class="setting-label">🔄 Servo</span>
+                <input type="range" class="setting-slider" id="servo" min="0" max="180" value="90" oninput="updateSetting('servo',this.value)">
+                <span class="setting-value" id="servo-val">90</span>
+            </div>
+            <div class="setting-row">
+                <span class="setting-label">⚡ Speed</span>
+                <input type="range" class="setting-slider" id="speed" min="150" max="255" value="220" oninput="updateSetting('speed',this.value)">
+                <span class="setting-value" id="speed-val">220</span>
+            </div>
+            <div class="setting-row">
+                <span class="setting-label">💡 LED</span>
+                <input type="range" class="setting-slider" id="flash" min="0" max="255" value="0" onchange="fetch(document.location.origin+'/control?var=flash&val='+this.value)">
+                <span class="setting-value" id="led-val">0</span>
+            </div>
+        </div>
 
-<div class="joystick-section">
-<div class="joystick-area" oncontextmenu="return false">
-<div class="direction-grid">
-<div class="grid-cell" id="btn-ul" onmousedown="press(6)" onmouseup="release()" ontouchstart="event.preventDefault();press(6)" ontouchend="release()">↖</div>
-<div class="grid-cell" id="btn-up" onmousedown="press(1)" onmouseup="release()" ontouchstart="event.preventDefault();press(1)" ontouchend="release()">↑</div>
-<div class="grid-cell" id="btn-ur" onmousedown="press(7)" onmouseup="release()" ontouchstart="event.preventDefault();press(7)" ontouchend="release()">↗</div>
-<div class="grid-cell" id="btn-left" onmousedown="press(4)" onmouseup="release()" ontouchstart="event.preventDefault();press(4)" ontouchend="release()">←</div>
-<div class="grid-cell center" onmousedown="release()" onmouseup="release()" ontouchstart="event.preventDefault();release()" ontouchend="release()">⚫</div>
-<div class="grid-cell" id="btn-right" onmousedown="press(2)" onmouseup="release()" ontouchstart="event.preventDefault();press(2)" ontouchend="release()">→</div>
-<div class="grid-cell" id="btn-dl" onmousedown="press(8)" onmouseup="release()" ontouchstart="event.preventDefault();press(8)" ontouchend="release()">↙</div>
-<div class="grid-cell" id="btn-down" onmousedown="press(5)" onmouseup="release()" ontouchstart="event.preventDefault();press(5)" ontouchend="release()">↓</div>
-<div class="grid-cell" id="btn-dr" onmousedown="press(9)" onmouseup="release()" ontouchstart="event.preventDefault();press(9)" ontouchend="release()">↘</div>
-</div>
-<button class="turn-btn left" id="btn-ccw" onmousedown="press(15)" onmouseup="release()" ontouchstart="event.preventDefault();press(15)" ontouchend="release()"><span>Left</span><span>↺</span></button>
-<button class="turn-btn right" id="btn-cw" onmousedown="press(10)" onmouseup="release()" ontouchstart="event.preventDefault();press(10)" ontouchend="release()"><span>Right</span><span>↻</span></button>
-</div>
-</div>
+        <div class="joystick-section">
+            <div class="joystick-area" oncontextmenu="return false">
+                <div class="direction-grid">
+                    <div class="grid-cell" id="btn-ul" onmousedown="press(6)" onmouseup="release()" ontouchstart="event.preventDefault();press(6)" ontouchend="release()">↖</div>
+                    <div class="grid-cell" id="btn-up" onmousedown="press(1)" onmouseup="release()" ontouchstart="event.preventDefault();press(1)" ontouchend="release()">↑</div>
+                    <div class="grid-cell" id="btn-ur" onmousedown="press(7)" onmouseup="release()" ontouchstart="event.preventDefault();press(7)" ontouchend="release()">↗</div>
+                    <div class="grid-cell" id="btn-left" onmousedown="press(4)" onmouseup="release()" ontouchstart="event.preventDefault();press(4)" ontouchend="release()">←</div>
+                    <div class="grid-cell center" onmousedown="release()" onmouseup="release()" ontouchstart="event.preventDefault();release()" ontouchend="release()">⚫</div>
+                    <div class="grid-cell" id="btn-right" onmousedown="press(2)" onmouseup="release()" ontouchstart="event.preventDefault();press(2)" ontouchend="release()">→</div>
+                    <div class="grid-cell" id="btn-dl" onmousedown="press(8)" onmouseup="release()" ontouchstart="event.preventDefault();press(8)" ontouchend="release()">↙</div>
+                    <div class="grid-cell" id="btn-down" onmousedown="press(5)" onmouseup="release()" ontouchstart="event.preventDefault();press(5)" ontouchend="release()">↓</div>
+                    <div class="grid-cell" id="btn-dr" onmousedown="press(9)" onmouseup="release()" ontouchstart="event.preventDefault();press(9)" ontouchend="release()">↘</div>
+                </div>
+                <button class="turn-btn left" id="btn-ccw" onmousedown="press(15)" onmouseup="release()" ontouchstart="event.preventDefault();press(15)" ontouchend="release()"><span>Left</span><span>↺</span></button>
+                <button class="turn-btn right" id="btn-cw" onmousedown="press(10)" onmouseup="release()" ontouchstart="event.preventDefault();press(10)" ontouchend="release()"><span>Right</span><span>↻</span></button>
+            </div>
+        </div>
 
-<div class="mode-section">
-<div class="mode-buttons">
-<button class="mode-btn selected" onclick="setMode(1)">Free Control</button>
-<button class="mode-btn" onclick="setMode(2)">Obstacle</button>
-<button class="mode-btn" onclick="setMode(3)">Following</button>
-<button class="mode-btn" onclick="setMode(4)">Line Trace</button>
-</div>
-</div>
+        <div class="mode-section">
+            <div class="mode-buttons">
+                <button class="mode-btn selected" onclick="setMode(1)">Free Control</button>
+                <button class="mode-btn" onclick="setMode(2)">Obstacle</button>
+                <button class="mode-btn" onclick="setMode(3)">Following</button>
+                <button class="mode-btn" onclick="setMode(4)">Line Trace</button>
+            </div>
+        </div>
 
-<div class="wifi-section">
-<div class="section-title">WiFi Settings</div>
-<div class="setting-row">
-<span class="setting-label">Mode</span>
-<div class="wifi-mode-toggle">
-<label><input type="radio" name="wifiMode" id="wifi-mode-ap" value="AP" onchange="toggleWifiFields()"> Access Point</label>
-<label><input type="radio" name="wifiMode" id="wifi-mode-sta" value="STA" onchange="toggleWifiFields()"> Wi-Fi Client (192.168.1.250)</label>
-</div>
-</div>
-<div id="wifi-sta-fields">
-<div class="setting-row">
-<span class="setting-label">SSID</span>
-<input type="text" class="wifi-input" id="wifi-ssid" placeholder="Home WiFi SSID">
-</div>
-<div class="setting-row">
-<span class="setting-label">Pass</span>
-<input type="password" class="wifi-input" id="wifi-pass" placeholder="WiFi Password">
-</div>
-</div>
-<div class="setting-row">
-<button class="btn" id="btn-wifi-save" onclick="saveWifiSettings()">Save & Connect</button>
-</div>
-<div class="wifi-info" id="wifi-info"></div>
-</div>
+        <div class="wifi-section">
+            <div class="section-title">WiFi Settings</div>
+            <div class="setting-row">
+                <span class="setting-label">Mode</span>
+                <div class="wifi-mode-toggle">
+                    <label><input type="radio" name="wifiMode" id="wifi-mode-ap" value="AP" onchange="toggleWifiFields()"> Access Point (192.168.4.1)</label>
+                    <label><input type="radio" name="wifiMode" id="wifi-mode-sta" value="STA" onchange="toggleWifiFields()"> Wi-Fi Client (192.168.1.250)</label>
+                </div>
+            </div>
+            <div id="wifi-sta-fields">
+                <div class="setting-row">
+                    <span class="setting-label">SSID</span>
+                    <input type="text" class="wifi-input" id="wifi-ssid" placeholder="WiFi SSID">
+                </div>
+                <div class="setting-row">
+                    <span class="setting-label">Pass</span>
+                    <input type="password" class="wifi-input" id="wifi-pass" placeholder="WiFi Password">
+                </div>
+            </div>
+            <div class="setting-row">
+                <button class="btn" id="btn-wifi-save" onclick="saveWifiSettings()">Save & Connect</button>
+            </div>
+            <div class="wifi-info" id="wifi-info"></div>
+        </div>
 
-<script>
-const BASE_URL = location.origin;
-let currentDir = 3;
+        <script>
+            const BASE_URL = location.origin;
+            let currentDir = 3;
 
-function loadWifiSettings(){
-fetch(BASE_URL+'/wifi-status').then(r=>r.json()).then(d=>{
-if(d.station){
-document.getElementById('wifi-mode-sta').checked = true;
-document.getElementById('wifi-ssid').value = d.ssid || '';
-document.getElementById('wifi-info').textContent = '';
-}else{
-document.getElementById('wifi-mode-ap').checked = true;
-}
-toggleWifiFields();
-}).catch(()=>{});
-}
+            function loadWifiSettings(){
+                fetch(BASE_URL+'/wifi-status').then(r=>r.json()).then(d=>{
+                    if(d.station){
+                        document.getElementById('wifi-mode-sta').checked = true;
+                        document.getElementById('wifi-ssid').value = d.ssid || '';
+                        document.getElementById('wifi-info').textContent = '';
+                    }else{
+                        document.getElementById('wifi-mode-ap').checked = true;
+                    }
+                    toggleWifiFields();
+                }).catch(()=>{});
+            }
 
-function toggleWifiFields(){
-var sta = document.getElementById('wifi-mode-sta').checked;
-document.getElementById('wifi-sta-fields').style.display = sta ? 'flex' : 'none';
-if(sta){
-document.getElementById('wifi-info').textContent = '';
-}else{
-document.getElementById('wifi-info').textContent = '';
-}
-}
+            function toggleWifiFields(){
+                var sta = document.getElementById('wifi-mode-sta').checked;
+                document.getElementById('wifi-sta-fields').style.display = sta ? 'flex' : 'none';
+                if(sta){
+                    document.getElementById('wifi-info').textContent = '';
+                }else{
+                    document.getElementById('wifi-info').textContent = '';
+                }
+            }
 
-loadWifiSettings();
+            loadWifiSettings();
 
-function updateStatus(){
-fetch(BASE_URL+'/status').then(r=>r.json()).then(d=>{
-var el = document.getElementById('rssi-val');
-if(d.rssi && d.rssi > -120) {
-el.textContent = 'RSSI ' + d.rssi + ' dBm';
-el.style.color = d.rssi > -50 ? '#0f0' : (d.rssi > -70 ? '#ff0' : '#f00');
-} else if(d.num > 0) {
-el.textContent = 'RSSI ' + d.rssi + ' dBm (' + d.num + ' client' + (d.num>1?'s':'') + ')';
-el.style.color = d.rssi > -50 ? '#0f0' : (d.rssi > -70 ? '#ff0' : '#f00');
-} else {
-el.textContent = 'RSSI: --';
-el.style.color = '#888';
-}
-if(d.mode === 'AP' && d.num > 0) {
-document.getElementById('wifi-info').textContent = d.num + ' client' + (d.num > 1 ? 's' : '') + ' connected';
-} else {
-document.getElementById('wifi-info').textContent = '';
-}
-}).catch(()=>{});
-}
-setInterval(updateStatus,5000);
-updateStatus();
+            function updateStatus(){
+                fetch(BASE_URL+'/status').then(r=>r.json()).then(d=>{
+                    var el = document.getElementById('rssi-val');
+                    if(d.rssi && d.rssi > -120) {
+                        el.textContent = 'RSSI ' + d.rssi + ' dBm';
+                        el.style.color = d.rssi > -50 ? '#0f0' : (d.rssi > -70 ? '#ff0' : '#f00');
+                    } else if(d.num > 0) {
+                        el.textContent = 'RSSI ' + d.rssi + ' dBm (' + d.num + ' client' + (d.num>1?'s':'') + ')';
+                        el.style.color = d.rssi > -50 ? '#0f0' : (d.rssi > -70 ? '#ff0' : '#f00');
+                    } else {
+                        el.textContent = 'RSSI: --';
+                        el.style.color = '#888';
+                    }
+                    if(d.mode === 'AP' && d.num > 0) {
+                        document.getElementById('wifi-info').textContent = d.num + ' client' + (d.num > 1 ? 's' : '') + ' connected';
+                    } else {
+                        document.getElementById('wifi-info').textContent = '';
+                    }
+                }).catch(()=>{});
+            }
+            setInterval(updateStatus,5000);
+            updateStatus();
 
-function sendCmd(cmd,val){fetch(BASE_URL+'/control?var='+cmd+'&val='+val)}
+            function sendCmd(cmd,val){fetch(BASE_URL+'/control?var='+cmd+'&val='+val)}
 
-function startStream(){document.getElementById('stream').src=BASE_URL+':81/stream';document.getElementById('video-container').classList.add('show');document.getElementById('btn-start').classList.add('active')}
-function stopStream(){document.getElementById('stream').src='';document.getElementById('video-container').classList.remove('show');document.querySelectorAll('.video-controls .btn').forEach(b=>b.classList.remove('active'))}
-function captureFrame(){document.getElementById('stream').src=BASE_URL+'/capture?_cb='+Date.now();document.getElementById('video-container').classList.add('show')}
+            function startStream(){document.getElementById('stream').src=BASE_URL+':81/stream';document.getElementById('video-container').classList.add('show');document.getElementById('btn-start').classList.add('active')}
+            function stopStream(){document.getElementById('stream').src='';document.getElementById('video-container').classList.remove('show');document.querySelectorAll('.video-controls .btn').forEach(b=>b.classList.remove('active'))}
+            function captureFrame(){document.getElementById('stream').src=BASE_URL+'/capture?_cb='+Date.now();document.getElementById('video-container').classList.add('show')}
 
-function updateSetting(id,val){
-document.getElementById(id+'-val').textContent=val;
-sendCmd(id,val);
-}
+            function updateSetting(id,val){
+                document.getElementById(id+'-val').textContent=val;
+                sendCmd(id,val);
+            }
 
-function setMode(val){
-document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('selected'));
-document.querySelectorAll('.mode-btn')[val-1].classList.add('selected');
-const modes=['Free Control','Obstacle','Following','Line Trace'];
-document.getElementById('current-mode').textContent='🎮 Mode: '+modes[val-1];
-sendCmd('model',val);
-}
+            function setMode(val){
+                document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('selected'));
+                document.querySelectorAll('.mode-btn')[val-1].classList.add('selected');
+                const modes=['Free Control','Obstacle','Following','Line Trace'];
+                document.getElementById('current-mode').textContent='🎮 Mode: '+modes[val-1];
+                sendCmd('model',val);
+            }
 
-function saveWifiSettings(){
-var mode = document.querySelector('input[name="wifiMode"]:checked').value;
-var ssid = document.getElementById('wifi-ssid').value;
-var pass = document.getElementById('wifi-pass').value;
+            function saveWifiSettings(){
+                var mode = document.querySelector('input[name="wifiMode"]:checked').value;
+                var ssid = document.getElementById('wifi-ssid').value;
+                var pass = document.getElementById('wifi-pass').value;
 
-if(mode === 'STA' && !ssid){
-document.getElementById('wifi-info').textContent = 'Error: Enter SSID';
-return;
-}
+                if(mode === 'STA' && !ssid){
+                    document.getElementById('wifi-info').textContent = 'Error: Enter SSID';
+                    return;
+                }
 
-document.getElementById('wifi-info').textContent = 'Saving...';
-var url = BASE_URL+'/wifi?ssid='+encodeURIComponent(ssid)+'&pass='+encodeURIComponent(pass)+'&mode='+mode;
-fetch(url).then(r=>r.json()).then(d=>{
-document.getElementById('wifi-info').textContent = d.ok ? 'Saved! Reboot ESP32!' : 'Error: ' + d.error;
-}).catch(e=>{
-document.getElementById('wifi-info').textContent = 'Error: ' + e;
-});
-}
+                document.getElementById('wifi-info').textContent = 'Saving...';
+                var url = BASE_URL+'/wifi?ssid='+encodeURIComponent(ssid)+'&pass='+encodeURIComponent(pass)+'&mode='+mode;
+                fetch(url).then(r=>r.json()).then(d=>{
+                    document.getElementById('wifi-info').textContent = d.ok ? 'Saved! Reboot ESP32!' : 'Error: ' + d.error;
+                }).catch(e=>{
+                    document.getElementById('wifi-info').textContent = 'Error: ' + e;
+                });
+            }
 
-function press(dir){
-if(currentDir === 3 && dir !== 3){
-document.querySelectorAll('.mode-btn')[0].classList.add('selected');
-document.querySelectorAll('.mode-btn').forEach((b,i)=>{if(i>0)b.classList.remove('selected')});
-document.getElementById('current-mode').textContent='🎮 Mode: Free Control';
-}
-sendCmd('car',dir);
-currentDir = dir;
-highlightArrow(dir);
-if(navigator.vibrate) navigator.vibrate(15);
-}
+            function press(dir){
+                if(currentDir === 3 && dir !== 3){
+                    document.querySelectorAll('.mode-btn')[0].classList.add('selected');
+                    document.querySelectorAll('.mode-btn').forEach((b,i)=>{if(i>0)b.classList.remove('selected')});
+                    document.getElementById('current-mode').textContent='🎮 Mode: Free Control';
+                }
+                sendCmd('car',dir);
+                currentDir = dir;
+                highlightArrow(dir);
+                if(navigator.vibrate) navigator.vibrate(15);
+            }
 
-function release(){
-sendCmd('car',3);
-currentDir = 3;
-clearArrows();
-if(navigator.vibrate) navigator.vibrate(10);
-}
+            function release(){
+                sendCmd('car',3);
+                currentDir = 3;
+                clearArrows();
+                if(navigator.vibrate) navigator.vibrate(10);
+            }
 
-function highlightArrow(dir){
-clearArrows();
-var map = {1:'up',2:'right',4:'left',5:'down',6:'ul',7:'ur',8:'dl',9:'dr',10:'cw',15:'ccw'};
-var idx = map[dir];
-if(idx){
-var cell = document.getElementById('btn-'+idx);
-if(cell) cell.classList.add('active');
-}
-}
+            function highlightArrow(dir){
+                clearArrows();
+                var map = {1:'up',2:'right',4:'left',5:'down',6:'ul',7:'ur',8:'dl',9:'dr',10:'cw',15:'ccw'};
+                var idx = map[dir];
+                if(idx){
+                    var cell = document.getElementById('btn-'+idx);
+                    if(cell) cell.classList.add('active');
+                }
+            }
 
-function clearArrows(){
-var btns = document.querySelectorAll('.grid-cell, .turn-btn');
-for(var i=0;i<btns.length;i++){
-btns[i].classList.remove('active');
-}
-}
-</script>
-</body>
+            function clearArrows(){
+                var btns = document.querySelectorAll('.grid-cell, .turn-btn');
+                for(var i=0;i<btns.length;i++){
+                    btns[i].classList.remove('active');
+                }
+            }
+        </script>
+    </body>
 </html>
 )rawliteral";
 
