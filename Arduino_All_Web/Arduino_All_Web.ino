@@ -50,7 +50,7 @@ byte RX_package[4] = {0};
 uint16_t angle = 90;
 byte Model = Stop;
 byte val = 0;
-char model_var = 0;
+byte model_var = 0;
 int UT_distance = 0;
 int OA_mark=0;
 void setup()
