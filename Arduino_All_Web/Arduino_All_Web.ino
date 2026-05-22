@@ -304,7 +304,6 @@ void model3_func()      // follow model
 {
   MOTORservo.write(90);
   UT_distance = SR04(Trig_PIN, Echo_PIN);
-  Serial.println(UT_distance);
   if (UT_distance < 15)
   {
     Motor(Backward, speeds-50);
@@ -411,23 +410,25 @@ void Motor(int Dir, int Speed)      // motor drive
 
 float SR04(int Trig, int Echo)      // ultrasonic measured distance
 {
+  static float filtered = 0;
   digitalWrite(Trig, LOW);
   delayMicroseconds(2);
   digitalWrite(Trig, HIGH);
   delayMicroseconds(10);
   digitalWrite(Trig, LOW);
-  float distance = pulseIn(Echo, HIGH) / 58.00;
-  delay(10);
+  float distance = pulseIn(Echo, HIGH, 23200) / 58.00;
 
-  return distance;
+  if (distance == 0 || distance > 400) return filtered;
+
+  filtered = filtered * 0.7 + distance * 0.3;
+  return filtered;
 }
 
 void RXpack_func()  //Receive data
 {
   if (Serial.available() > 0)
   {
-    delay(1);                                           // delay 1MS
-    if (Serial.readBytes(RX_package, 4))
+    if (Serial.readBytes(RX_package, 4) == 4)
     {
       if (RX_package[0] == 0xAB && RX_package[3] == 0xFF)     // The header and tail of the packet are verified
       {
