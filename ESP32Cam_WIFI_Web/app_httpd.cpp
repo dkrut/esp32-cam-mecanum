@@ -245,6 +245,11 @@ static esp_err_t cmd_handler(httpd_req_t *req)
     else if(!strcmp(variable, "model")) 
     {
       txdata[2] = 0;
+      if (val==1)
+      {
+        txdata[1] = Model1;
+        Serial.write(txdata, 4);
+      }
       if (val==2)
       {
         txdata[1] = Model2;
