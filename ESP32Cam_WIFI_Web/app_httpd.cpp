@@ -168,9 +168,6 @@ static esp_err_t stream_handler(httpd_req_t *req){
     return res;
 }
 
-enum state {fwd,rev,stp};
-state actstate = stp;
-
 static esp_err_t cmd_handler(httpd_req_t *req)
 {
     char*  buf;
@@ -290,7 +287,6 @@ static esp_err_t cmd_handler(httpd_req_t *req)
         txdata[2] = Stop;
         Serial.write(txdata, 4);
         //Serial.println("Stop");
-        actstate = stp;       
         //httpd_resp_set_type(req, "text/html");
         //return httpd_resp_send(req, "OK", 2); 
       }
@@ -307,7 +303,6 @@ static esp_err_t cmd_handler(httpd_req_t *req)
         txdata[2] = Backward;
         Serial.write(txdata, 4);
         //Serial.println("Back");  
-        actstate = rev;      
         //httpd_resp_set_type(req, "text/html");
         //return httpd_resp_send(req, "OK", 2);              
       }
@@ -842,6 +837,7 @@ void startCameraServer()
     
     if(!wifiStationMode) {
         WiFi.mode(WIFI_AP);
+        WiFi.softAP("KUONGSHUN-AD176", "12345678", 5);
     }
     wifiPrefs.end();
     

@@ -6,7 +6,6 @@ const char *ssid = "KUONGSHUN-AD176";
 const char *password = "12345678";
 
 
-String wifi_name;
 
 #define PWDN_GPIO_NUM     32
 #define RESET_GPIO_NUM    -1
@@ -92,10 +91,8 @@ void CameraWebServer_init()
   s->set_hmirror(s, 0); //Image Direction Setting(Left/Right)
 
   WiFi.setTxPower(WIFI_POWER_19_5dBm);
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP(ssid, password, 5);
   startCameraServer();
-  // WiFi.softAP(ssid, password);
+
   IPAddress miIP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(miIP); //probar 192.168.4.1

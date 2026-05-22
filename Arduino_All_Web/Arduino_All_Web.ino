@@ -368,7 +368,6 @@ void Servo_Move()  //servo
   static uint16_t target_angle = 90;
   static unsigned long last_move_time = 0;
   const int STEP_DELAY = 10;
-  const int STEP_SIZE = 1;
   const int HYSTERESIS = 1;
   
   uint16_t safe_angle = (angle == 0) ? 1 : angle;
