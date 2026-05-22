@@ -465,7 +465,7 @@ static esp_err_t wifi_status_handler(httpd_req_t *req){
 }
 
 static const char PROGMEM INDEX_HTML[] = R"rawliteral(
-<!doctype html>
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
@@ -477,7 +477,8 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
             body{background:var(--bg-gradient);font-family:'Segoe UI',sans-serif;color:var(--text-primary);min-height:100vh;overflow-x:hidden;max-width:640px;margin:0 auto;padding:8px}
             .header{background:rgba(0,0,0,0.5);padding:6px 12px;display:flex;justify-content:space-between;align-items:center;border-radius:15px;margin-bottom:1px;font-size:11px;font-family:monospace}
             .status-left{display:flex;align-items:center;gap:4px;font-size:11px}
-            .status-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
+            .status-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite;transition:background 0.3s}
+            .status-dot.disconnected{background:#f00;animation:none}
             .mode-right{font-size:11px;font-weight:600;color:#0f0}
             .video-section{padding:4px;text-align:center}
             .video-container{position:relative;width:100%;max-width:640px;margin:0 auto;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:4/3;display:none}
@@ -546,61 +547,61 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
     </head>
     <body>
         <div class="header">
-            <div class="status-left">📡 <span id="rssi-val">...</span></div>
+            <div class="status-left"><span class="status-dot"></span> 📡 <span id="rssi-val">...</span></div>
             <div class="mode-right" id="current-mode">🎮 Mode: Free Control</div>
         </div>
 
         <div class="video-section">
             <div class="video-container" id="video-container"><img id="stream" src="" alt="Camera"></div>
             <div class="video-controls">
-                <button class="btn" id="btn-start" onclick="startStream()">▶ Start</button>
-                <button class="btn" id="btn-capture" onclick="captureFrame()">📸 Snapshot</button>
-                <button class="btn" id="btn-stop" onclick="stopStream()">⏹ Stop</button>
+                <button class="btn" id="btn-start">▶ Start</button>
+                <button class="btn" id="btn-capture">📸 Snapshot</button>
+                <button class="btn" id="btn-stop">⏹ Stop</button>
             </div>
         </div>
 
         <div class="settings-section">
             <div class="setting-row">
                 <span class="setting-label">🔄 Servo</span>
-                <input type="range" class="setting-slider" id="servo" min="0" max="180" value="90" oninput="updateSetting('servo',this.value)">
+                <input type="range" class="setting-slider" id="servo" min="0" max="180" value="90">
                 <span class="setting-value" id="servo-val">90</span>
             </div>
             <div class="setting-row">
                 <span class="setting-label">⚡ Speed</span>
-                <input type="range" class="setting-slider" id="speed" min="150" max="255" value="220" oninput="updateSetting('speed',this.value)">
+                <input type="range" class="setting-slider" id="speed" min="150" max="255" value="220">
                 <span class="setting-value" id="speed-val">220</span>
             </div>
             <div class="setting-row">
                 <span class="setting-label">💡 LED</span>
-                <input type="range" class="setting-slider" id="flash" min="0" max="255" value="0" oninput="updateSetting('flash',this.value)">
+                <input type="range" class="setting-slider" id="flash" min="0" max="255" value="0">
                 <span class="setting-value" id="flash-val">0</span>
             </div>
         </div>
 
         <div class="joystick-section">
-            <div class="joystick-area" oncontextmenu="return false">
+            <div class="joystick-area">
                 <div class="direction-grid">
-                    <div class="grid-cell" id="btn-ul" onmousedown="press(6)" onmouseup="release()" ontouchstart="event.preventDefault();press(6)" ontouchend="release()">↖</div>
-                    <div class="grid-cell" id="btn-up" onmousedown="press(1)" onmouseup="release()" ontouchstart="event.preventDefault();press(1)" ontouchend="release()">↑</div>
-                    <div class="grid-cell" id="btn-ur" onmousedown="press(7)" onmouseup="release()" ontouchstart="event.preventDefault();press(7)" ontouchend="release()">↗</div>
-                    <div class="grid-cell" id="btn-left" onmousedown="press(4)" onmouseup="release()" ontouchstart="event.preventDefault();press(4)" ontouchend="release()">←</div>
-                    <div class="grid-cell center" onmousedown="release()" onmouseup="release()" ontouchstart="event.preventDefault();release()" ontouchend="release()">⚫</div>
-                    <div class="grid-cell" id="btn-right" onmousedown="press(2)" onmouseup="release()" ontouchstart="event.preventDefault();press(2)" ontouchend="release()">→</div>
-                    <div class="grid-cell" id="btn-dl" onmousedown="press(8)" onmouseup="release()" ontouchstart="event.preventDefault();press(8)" ontouchend="release()">↙</div>
-                    <div class="grid-cell" id="btn-down" onmousedown="press(5)" onmouseup="release()" ontouchstart="event.preventDefault();press(5)" ontouchend="release()">↓</div>
-                    <div class="grid-cell" id="btn-dr" onmousedown="press(9)" onmouseup="release()" ontouchstart="event.preventDefault();press(9)" ontouchend="release()">↘</div>
+                    <div class="grid-cell" id="btn-ul">↖</div>
+                    <div class="grid-cell" id="btn-up">↑</div>
+                    <div class="grid-cell" id="btn-ur">↗</div>
+                    <div class="grid-cell" id="btn-left">←</div>
+                    <div class="grid-cell center">⚫</div>
+                    <div class="grid-cell" id="btn-right">→</div>
+                    <div class="grid-cell" id="btn-dl">↙</div>
+                    <div class="grid-cell" id="btn-down">↓</div>
+                    <div class="grid-cell" id="btn-dr">↘</div>
                 </div>
-                <button class="turn-btn left" id="btn-ccw" onmousedown="press(15)" onmouseup="release()" ontouchstart="event.preventDefault();press(15)" ontouchend="release()"><span>Left</span><span>↺</span></button>
-                <button class="turn-btn right" id="btn-cw" onmousedown="press(10)" onmouseup="release()" ontouchstart="event.preventDefault();press(10)" ontouchend="release()"><span>Right</span><span>↻</span></button>
+                <button class="turn-btn left" id="btn-ccw"><span>Left</span><span>↺</span></button>
+                <button class="turn-btn right" id="btn-cw"><span>Right</span><span>↻</span></button>
             </div>
         </div>
 
         <div class="mode-section">
             <div class="mode-buttons">
-                <button class="mode-btn selected" onclick="setMode(1)">Free Control</button>
-                <button class="mode-btn" onclick="setMode(2)">Obstacle</button>
-                <button class="mode-btn" onclick="setMode(3)">Following</button>
-                <button class="mode-btn" onclick="setMode(4)">Line Trace</button>
+                <button class="mode-btn selected">Free Control</button>
+                <button class="mode-btn">Obstacle</button>
+                <button class="mode-btn">Following</button>
+                <button class="mode-btn">Line Trace</button>
             </div>
         </div>
 
@@ -609,8 +610,8 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
             <div class="setting-row">
                 <span class="setting-label">Mode</span>
                 <div class="wifi-mode-toggle">
-                    <label><input type="radio" name="wifiMode" id="wifi-mode-ap" value="AP" onchange="toggleWifiFields()"> Access Point (192.168.4.1)</label>
-                    <label><input type="radio" name="wifiMode" id="wifi-mode-sta" value="STA" onchange="toggleWifiFields()"> Wi-Fi Client (192.168.1.250)</label>
+                    <label><input type="radio" name="wifiMode" id="wifi-mode-ap" value="AP"> Access Point (192.168.4.1)</label>
+                    <label><input type="radio" name="wifiMode" id="wifi-mode-sta" value="STA"> Wi-Fi Client (192.168.1.250)</label>
                 </div>
             </div>
             <div id="wifi-sta-fields">
@@ -624,7 +625,7 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
                 </div>
             </div>
             <div class="setting-row">
-                <button class="btn" id="btn-wifi-save" onclick="saveWifiSettings()">Save & Connect</button>
+                <button class="btn" id="btn-wifi-save">Save & Connect</button>
             </div>
             <div class="wifi-info" id="wifi-info"></div>
         </div>
@@ -638,7 +639,6 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
                     if(d.station){
                         document.getElementById('wifi-mode-sta').checked = true;
                         document.getElementById('wifi-ssid').value = d.ssid || '';
-                        document.getElementById('wifi-info').textContent = '';
                     }else{
                         document.getElementById('wifi-mode-ap').checked = true;
                     }
@@ -647,74 +647,95 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
             }
 
             function toggleWifiFields(){
-                var sta = document.getElementById('wifi-mode-sta').checked;
+                const sta = document.getElementById('wifi-mode-sta').checked;
                 document.getElementById('wifi-sta-fields').style.display = sta ? 'flex' : 'none';
-                if(sta){
-                    document.getElementById('wifi-info').textContent = '';
-                }else{
-                    document.getElementById('wifi-info').textContent = '';
-                }
             }
 
             loadWifiSettings();
 
             function updateStatus(){
-                fetch(BASE_URL+'/status').then(r=>r.json()).then(d=>{
-                    var el = document.getElementById('rssi-val');
-                    if(d.rssi && d.rssi > -120) {
-                        el.textContent = 'RSSI ' + d.rssi + ' dBm';
-                        el.style.color = d.rssi > -50 ? '#0f0' : (d.rssi > -70 ? '#ff0' : '#f00');
-                    } else if(d.num > 0) {
-                        el.textContent = 'RSSI ' + d.rssi + ' dBm (' + d.num + ' client' + (d.num>1?'s':'') + ')';
-                        el.style.color = d.rssi > -50 ? '#0f0' : (d.rssi > -70 ? '#ff0' : '#f00');
-                    } else {
-                        el.textContent = 'RSSI: --';
-                        el.style.color = '#888';
-                    }
-                    if(d.mode === 'AP' && d.num > 0) {
-                        document.getElementById('wifi-info').textContent = d.num + ' client' + (d.num > 1 ? 's' : '') + ' connected';
-                    } else {
-                        document.getElementById('wifi-info').textContent = '';
-                    }
-                }).catch(()=>{});
+                const el = document.getElementById('rssi-val');
+                const statusDot = document.querySelector('.status-dot');
+
+                fetch(BASE_URL+'/status')
+                    .then(r => r.json())
+                    .then(d => {
+                        statusDot.className = 'status-dot';
+                        if(d.rssi && d.rssi > -120) {
+                            el.textContent = 'RSSI ' + d.rssi + ' dBm';
+                            el.style.color = d.rssi > -50 ? '#0f0' : (d.rssi > -70 ? '#ff0' : '#f00');
+                        } else if(d.num > 0) {
+                            el.textContent = 'RSSI ' + d.rssi + ' dBm (' + d.num + ' client' + (d.num>1?'s':'') + ')';
+                            el.style.color = d.rssi > -50 ? '#0f0' : (d.rssi > -70 ? '#ff0' : '#f00');
+                        } else {
+                            el.textContent = 'RSSI: --';
+                            el.style.color = '#888';
+                        }
+                        if(d.mode === 'AP' && d.num > 0) {
+                            document.getElementById('wifi-info').textContent = d.num + ' client' + (d.num > 1 ? 's' : '') + ' connected';
+                        } else {
+                            document.getElementById('wifi-info').textContent = '';
+                        }
+                    })
+                    .catch(() => {
+                        el.textContent = '\u26A0 Disconnected';
+                        el.style.color = '#f00';
+                        statusDot.className = 'status-dot disconnected';
+                    });
             }
             setInterval(updateStatus,5000);
             updateStatus();
 
             function sendCmd(cmd,val){fetch(BASE_URL+'/control?var='+cmd+'&val='+val)}
 
-            function startStream(){document.getElementById('stream').src=BASE_URL+':81/stream';document.getElementById('video-container').classList.add('show');document.getElementById('btn-start').classList.add('active')}
-            function stopStream(){document.getElementById('stream').src='';document.getElementById('video-container').classList.remove('show');document.querySelectorAll('.video-controls .btn').forEach(b=>b.classList.remove('active'))}
-            function captureFrame(){document.getElementById('stream').src=BASE_URL+'/capture?_cb='+Date.now();document.getElementById('video-container').classList.add('show')}
+            function startStream(){
+                document.getElementById('stream').src = BASE_URL+':81/stream';
+                document.getElementById('video-container').classList.add('show');
+                document.getElementById('btn-start').classList.add('active');
+            }
+            function stopStream(){
+                document.getElementById('stream').src = '';
+                document.getElementById('video-container').classList.remove('show');
+                document.querySelectorAll('.video-controls .btn').forEach(b => b.classList.remove('active'));
+            }
+            function captureFrame(){
+                document.getElementById('stream').src = BASE_URL+'/capture?_cb='+Date.now();
+                document.getElementById('video-container').classList.add('show');
+                document.querySelectorAll('.video-controls .btn').forEach(b => b.classList.remove('active'));
+            }
 
             function updateSetting(id,val){
-                document.getElementById(id+'-val').textContent=val;
+                document.getElementById(id+'-val').textContent = val;
                 sendCmd(id,val);
             }
 
             function setMode(val){
-                document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('selected'));
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
                 document.querySelectorAll('.mode-btn')[val-1].classList.add('selected');
-                const modes=['Free Control','Obstacle','Following','Line Trace'];
-                document.getElementById('current-mode').textContent='🎮 Mode: '+modes[val-1];
+                const modes = ['Free Control','Obstacle','Following','Line Trace'];
+                document.getElementById('current-mode').textContent = '\uD83C\uDFAE Mode: '+modes[val-1];
                 sendCmd('model',val);
             }
 
             function saveWifiSettings(){
-                var mode = document.querySelector('input[name="wifiMode"]:checked').value;
-                var ssid = document.getElementById('wifi-ssid').value;
-                var pass = document.getElementById('wifi-pass').value;
+                const mode = document.querySelector('input[name="wifiMode"]:checked').value;
+                const ssid = document.getElementById('wifi-ssid').value;
+                const pass = document.getElementById('wifi-pass').value;
 
                 if(mode === 'STA' && !ssid){
                     document.getElementById('wifi-info').textContent = 'Error: Enter SSID';
                     return;
                 }
+                if(mode === 'STA' && pass.length > 0 && pass.length < 8){
+                    document.getElementById('wifi-info').textContent = 'Error: Password must be at least 8 characters';
+                    return;
+                }
 
                 document.getElementById('wifi-info').textContent = 'Saving...';
-                var url = BASE_URL+'/wifi?ssid='+encodeURIComponent(ssid)+'&pass='+encodeURIComponent(pass)+'&mode='+mode;
+                const url = BASE_URL+'/wifi?ssid='+encodeURIComponent(ssid)+'&pass='+encodeURIComponent(pass)+'&mode='+mode;
                 fetch(url).then(r=>r.json()).then(d=>{
                     document.getElementById('wifi-info').textContent = d.ok ? 'Saved! Reboot ESP32!' : 'Error: ' + d.error;
-                }).catch(e=>{
+                }).catch(e => {
                     document.getElementById('wifi-info').textContent = 'Error: ' + e;
                 });
             }
@@ -722,8 +743,8 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
             function press(dir){
                 if(currentDir === 3 && dir !== 3){
                     document.querySelectorAll('.mode-btn')[0].classList.add('selected');
-                    document.querySelectorAll('.mode-btn').forEach((b,i)=>{if(i>0)b.classList.remove('selected')});
-                    document.getElementById('current-mode').textContent='🎮 Mode: Free Control';
+                    document.querySelectorAll('.mode-btn').forEach((b,i) => {if(i>0)b.classList.remove('selected')});
+                    document.getElementById('current-mode').textContent = '\uD83C\uDFAE Mode: Free Control';
                 }
                 sendCmd('car',dir);
                 currentDir = dir;
@@ -740,20 +761,74 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
 
             function highlightArrow(dir){
                 clearArrows();
-                var map = {1:'up',2:'right',4:'left',5:'down',6:'ul',7:'ur',8:'dl',9:'dr',10:'cw',15:'ccw'};
-                var idx = map[dir];
+                const map = {1:'up',2:'right',4:'left',5:'down',6:'ul',7:'ur',8:'dl',9:'dr',10:'cw',15:'ccw'};
+                const idx = map[dir];
                 if(idx){
-                    var cell = document.getElementById('btn-'+idx);
+                    const cell = document.getElementById('btn-'+idx);
                     if(cell) cell.classList.add('active');
                 }
             }
 
             function clearArrows(){
-                var btns = document.querySelectorAll('.grid-cell, .turn-btn');
-                for(var i=0;i<btns.length;i++){
+                const btns = document.querySelectorAll('.grid-cell, .turn-btn');
+                for(let i = 0; i < btns.length; i++){
                     btns[i].classList.remove('active');
                 }
             }
+
+            document.getElementById('btn-start').addEventListener('click', startStream);
+            document.getElementById('btn-capture').addEventListener('click', captureFrame);
+            document.getElementById('btn-stop').addEventListener('click', stopStream);
+
+            document.getElementById('servo').addEventListener('input', function(){
+                updateSetting('servo', this.value);
+            });
+            document.getElementById('speed').addEventListener('input', function(){
+                updateSetting('speed', this.value);
+            });
+            document.getElementById('flash').addEventListener('input', function(){
+                updateSetting('flash', this.value);
+            });
+
+            const dirBtns = {ul:6, up:1, ur:7, left:4, right:2, dl:8, down:5, dr:9};
+            for(const [id, dir] of Object.entries(dirBtns)){
+                const btn = document.getElementById('btn-'+id);
+                if(!btn) continue;
+                btn.addEventListener('mousedown', function(e){e.preventDefault(); press(dir)});
+                btn.addEventListener('mouseup', release);
+                btn.addEventListener('mouseleave', release);
+                btn.addEventListener('touchstart', function(e){e.preventDefault(); press(dir)});
+                btn.addEventListener('touchend', release);
+                btn.addEventListener('touchcancel', release);
+            }
+
+            const centerBtn = document.querySelector('.grid-cell.center');
+            if(centerBtn){
+                centerBtn.addEventListener('mousedown', function(e){e.preventDefault(); release()});
+                centerBtn.addEventListener('touchstart', function(e){e.preventDefault(); release()});
+            }
+
+            document.getElementById('btn-ccw').addEventListener('mousedown', function(e){e.preventDefault(); press(15)});
+            document.getElementById('btn-ccw').addEventListener('mouseup', release);
+            document.getElementById('btn-ccw').addEventListener('mouseleave', release);
+            document.getElementById('btn-ccw').addEventListener('touchstart', function(e){e.preventDefault(); press(15)});
+            document.getElementById('btn-ccw').addEventListener('touchend', release);
+            document.getElementById('btn-ccw').addEventListener('touchcancel', release);
+
+            document.getElementById('btn-cw').addEventListener('mousedown', function(e){e.preventDefault(); press(10)});
+            document.getElementById('btn-cw').addEventListener('mouseup', release);
+            document.getElementById('btn-cw').addEventListener('mouseleave', release);
+            document.getElementById('btn-cw').addEventListener('touchstart', function(e){e.preventDefault(); press(10)});
+            document.getElementById('btn-cw').addEventListener('touchend', release);
+            document.getElementById('btn-cw').addEventListener('touchcancel', release);
+
+            document.querySelectorAll('.mode-btn').forEach((btn, i) => {
+                btn.addEventListener('click', () => setMode(i + 1));
+            });
+
+            document.getElementById('wifi-mode-ap').addEventListener('change', toggleWifiFields);
+            document.getElementById('wifi-mode-sta').addEventListener('change', toggleWifiFields);
+            document.getElementById('btn-wifi-save').addEventListener('click', saveWifiSettings);
         </script>
     </body>
 </html>
