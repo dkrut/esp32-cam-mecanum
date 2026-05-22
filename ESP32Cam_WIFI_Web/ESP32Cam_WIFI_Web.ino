@@ -44,6 +44,11 @@ void setup()
 
 void loop() 
 {
-  //delay(1000);
-  //Serial.printf("RSSi: %ld dBm\n", WiFi.RSSI());
+  static unsigned long lastWifiCheck = 0;
+  if (millis() - lastWifiCheck > 10000) {
+    lastWifiCheck = millis();
+    if (WiFi.status() != WL_CONNECTED && WiFi.getMode() == WIFI_STA) {
+      WiFi.reconnect();
+    }
+  }
 }
