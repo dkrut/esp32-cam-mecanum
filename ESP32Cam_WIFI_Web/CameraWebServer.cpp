@@ -2,10 +2,6 @@
 #include "esp_camera.h"
 #include <WiFi.h>
 
-const char *ssid = "KUONGSHUN-AD176";
-const char *password = "12345678";
-
-
 
 #define PWDN_GPIO_NUM     32
 #define RESET_GPIO_NUM    -1

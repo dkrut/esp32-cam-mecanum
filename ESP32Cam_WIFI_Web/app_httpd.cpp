@@ -72,9 +72,6 @@ static esp_err_t capture_handler(httpd_req_t *req){
     httpd_resp_set_type(req, "image/jpeg");
     httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");
 
-    size_t out_len, out_width, out_height;
-    uint8_t * out_buf;
-    bool s;
     {
         size_t fb_len = 0;
         if(fb->format == PIXFORMAT_JPEG){
@@ -275,121 +272,76 @@ static esp_err_t cmd_handler(httpd_req_t *req)
       {
         txdata[2] = Forward;
         Serial.write(txdata, 4);
-        //Serial.println("Go");
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);
       }
       else if (val==2) 
       {   
         txdata[2] = Turn_Right;
         Serial.write(txdata, 4);
-        //Serial.println("Right");
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);
       }
       else if (val==3) 
       {
         txdata[2] = Stop;
         Serial.write(txdata, 4);
-        //Serial.println("Stop");
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2); 
       }
       else if (val==4) 
       {
         txdata[2] = Turn_Left;
         Serial.write(txdata, 4);
-        //Serial.println("Left");
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);        
       }
       else if (val==5) 
       {
         txdata[2] = Backward;
         Serial.write(txdata, 4);
-        //Serial.println("Back");  
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);              
       }
       else if (val==6) 
       {
         txdata[2] = Top_Left;
         Serial.write(txdata, 4);
-        //Serial.println("Back");       
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);              
       }
       else if (val==7) 
       {
         txdata[2] = Top_Right;
         Serial.write(txdata, 4);
-        //Serial.println("Back");      
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);              
       }
       else if (val==8) 
       {
         txdata[2] = Bottom_Left;
         Serial.write(txdata, 4);
-        //Serial.println("Back");      
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);              
       }
       else if (val==9) 
       {
         txdata[2] = Bottom_Right;
         Serial.write(txdata, 4);
-        //Serial.println("Back");       
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);              
       }
       else if (val==10) 
       {
         txdata[2] = Clockwise;
         Serial.write(txdata, 4);
-        //Serial.println("Back");      
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);              
       }
       else if (val==11) 
       {
         txdata[2] = Model1;
         Serial.write(txdata, 4);
-        //Serial.println("Back");       
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);              
       }
       else if (val==12) 
       {
         txdata[2] = Model2;
         Serial.write(txdata, 4);
-        //Serial.println("Back");     
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);              
       }
       else if (val==13) 
       {
         txdata[2] = Model3;
         Serial.write(txdata, 4);
-        //Serial.println("Back");      
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);              
       }
       else if (val==14) 
       {
         txdata[2] = Model4;
         Serial.write(txdata, 4);
-        //Serial.println("Back");      
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);              
       }
       else if (val==15) 
       {
         txdata[2] = Contrarotate;
         Serial.write(txdata, 4);
-        //Serial.println("Back");      
-        //httpd_resp_set_type(req, "text/html");
-        //return httpd_resp_send(req, "OK", 2);              
       }
     }        
     else 

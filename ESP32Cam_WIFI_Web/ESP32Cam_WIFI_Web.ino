@@ -11,9 +11,6 @@
 
 void CameraWebServer_init();
 
-WiFiServer server(100);
-
-
 extern int gpLed =  4; // Light
 
 void setup()
@@ -30,8 +27,6 @@ void setup()
   pinMode(gpLed, OUTPUT); //Light
   ledcSetup(7, 5000, 8);
   ledcAttachPin(gpLed, 7);  //pin4 is LED
-
-  server.begin();
 
   for (int i = 0; i < 5; i++) 
   {
