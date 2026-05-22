@@ -620,8 +620,8 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
             </div>
             <div class="setting-row">
                 <span class="setting-label">💡 LED</span>
-                <input type="range" class="setting-slider" id="flash" min="0" max="255" value="0" onchange="fetch(document.location.origin+'/control?var=flash&val='+this.value)">
-                <span class="setting-value" id="led-val">0</span>
+                <input type="range" class="setting-slider" id="flash" min="0" max="255" value="0" oninput="updateSetting('flash',this.value)">
+                <span class="setting-value" id="flash-val">0</span>
             </div>
         </div>
 
