@@ -201,7 +201,12 @@ static esp_err_t cmd_handler(httpd_req_t *req)
         return ESP_FAIL;
     }
 
-    int val = atoi(value);
+    char *end;
+    int val = (int)strtol(value, &end, 10);
+    if (value[0] == '\0' || *end != '\0') {
+        httpd_resp_send_404(req);
+        return ESP_FAIL;
+    }
     byte txdata[4] = {0xAB, 0, 0, 0xFF};
     sensor_t * s = esp_camera_sensor_get();
     int res = 0;
