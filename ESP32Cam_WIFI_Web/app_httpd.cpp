@@ -434,6 +434,7 @@ static esp_err_t wifi_handler(httpd_req_t *req){
         wifiPrefs.putString("ssid", ssid);
         wifiPrefs.putString("pass", pass);
         wifiPrefs.putBool("station", isStation);
+        wifiPrefs.end();
         Serial.printf("Saved: ssid=%s, station=%d\n", ssid, isStation);
         p+=sprintf(p, "\"ok\":true");
     }
@@ -457,6 +458,7 @@ static esp_err_t status_handler(httpd_req_t *req){
     
     wifiPrefs.begin("wifi", false);
     bool isStation = wifiPrefs.getBool("station", false);
+    wifiPrefs.end();
     
     int rssi = 0;
     int num = 0;
@@ -491,6 +493,7 @@ static esp_err_t wifi_status_handler(httpd_req_t *req){
     wifiPrefs.begin("wifi", false);
     bool station = wifiPrefs.getBool("station", false);
     String ssid = wifiPrefs.getString("ssid", "");
+    wifiPrefs.end();
     static char json_response[256];
     char * p = json_response;
     *p++ = '{';
@@ -835,6 +838,7 @@ void startCameraServer()
     if(!wifiStationMode) {
         WiFi.mode(WIFI_AP);
     }
+    wifiPrefs.end();
     
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     
