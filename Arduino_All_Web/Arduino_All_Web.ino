@@ -148,68 +148,155 @@ void model1_func(byte values)
   }
 }
 
-void model2_func()      // OA
+void model2_func()
 {
-  while (model_var == 1) {
-    RXpack_func();
-    middleDistance = SR04(Trig_PIN, Echo_PIN);
-    if (middleDistance <= 15)
-    {
-      Motor(Stop, 0);
-      delay(100);
-      Motor(Backward, speeds-70);
-      delay(100);
-      Motor(Clockwise, speeds);
-      delay(200);
-      Motor(Stop, 0);
-      delay(200);
-      rightDistance = SR04(Trig_PIN, Echo_PIN);//SR04();
-      delay(200);
-      if (rightDistance > 15)
-      {
-        continue;
+  static int oa_step = 0;
+  static unsigned long step_start = 0;
+  
+  if (model_var != 1) { oa_step = 0; return; }
+  
+  unsigned long now = millis();
+  middleDistance = SR04(Trig_PIN, Echo_PIN);
+  
+  switch (oa_step) {
+    case 0:
+      if (middleDistance <= 15) {
+        Motor(Stop, 0);
+        step_start = now;
+        oa_step = 1;
+      } else {
+        Motor(Forward, speeds);
       }
-      else if(OA_mark==0)
-      {
-        OA_mark++;
-        continue;
-      }
-      Motor(Contrarotate, speeds);
-      delay(600);
-      Motor(Stop, 0);
-      delay(200);
-      leftDistance = SR04(Trig_PIN, Echo_PIN);//SR04();
-      delay(200);
+      break;
 
-      if (rightDistance > leftDistance) {
-        Motor(Backward, speeds-70);
-        delay(500);
+    case 1:
+      if (now - step_start >= 100) {
+        Motor(Backward, speeds - 70);
+        step_start = now;
+        oa_step = 2;
+      }
+      break;
+
+    case 2:
+      if (now - step_start >= 100) {
         Motor(Clockwise, speeds);
-        delay(500);
-        OA_mark=0;
-        continue;
+        step_start = now;
+        oa_step = 3;
       }
-      else if (rightDistance < leftDistance) {
-        while (leftDistance < 25) {
+      break;
+
+    case 3:
+      if (now - step_start >= 200) {
+        Motor(Stop, 0);
+        step_start = now;
+        oa_step = 4;
+      }
+      break;
+
+    case 4:
+      if (now - step_start >= 200) {
+        rightDistance = SR04(Trig_PIN, Echo_PIN);
+        step_start = now;
+        oa_step = 5;
+      }
+      break;
+
+    case 5:
+      if (now - step_start >= 200) {
+        if (rightDistance > 15) {
+          oa_step = 0;
+        } else if (OA_mark == 0) {
+          OA_mark++;
+          oa_step = 0;
+        } else {
           Motor(Contrarotate, speeds);
-          delay(200);
-          Motor(Stop, 0);
-          delay(200);
-          leftDistance = SR04(Trig_PIN, Echo_PIN);//SR04();
-          delay(200);
-          
+          step_start = now;
+          oa_step = 6;
         }
-        Motor(Contrarotate, speeds);
-        delay(100);
-        OA_mark=0;
-        
-        continue;
       }
-    }
-    else
-    {
-      Motor(Forward, speeds);
-    }
+      break;
+
+    case 6:
+      if (now - step_start >= 600) {
+        Motor(Stop, 0);
+        step_start = now;
+        oa_step = 7;
+      }
+      break;
+
+    case 7:
+      if (now - step_start >= 200) {
+        leftDistance = SR04(Trig_PIN, Echo_PIN);
+        step_start = now;
+        oa_step = 8;
+      }
+      break;
+
+    case 8:
+      if (now - step_start >= 200) {
+        if (rightDistance > leftDistance) {
+          Motor(Backward, speeds - 70);
+          step_start = now;
+          oa_step = 9;
+        } else {
+          Motor(Contrarotate, speeds);
+          step_start = now;
+          oa_step = 11;
+        }
+      }
+      break;
+
+    case 9:
+      if (now - step_start >= 500) {
+        Motor(Clockwise, speeds);
+        step_start = now;
+        oa_step = 10;
+      }
+      break;
+
+    case 10:
+      if (now - step_start >= 500) {
+        OA_mark = 0;
+        oa_step = 0;
+      }
+      break;
+
+    case 11:
+      if (now - step_start >= 200) {
+        Motor(Stop, 0);
+        step_start = now;
+        oa_step = 12;
+      }
+      break;
+
+    case 12:
+      if (now - step_start >= 200) {
+        leftDistance = SR04(Trig_PIN, Echo_PIN);
+        step_start = now;
+        oa_step = 13;
+      }
+      break;
+
+    case 13:
+      if (now - step_start >= 200) {
+        if (leftDistance < 25) {
+          Motor(Contrarotate, speeds);
+          step_start = now;
+          oa_step = 11;
+        } else {
+          Motor(Contrarotate, speeds);
+          step_start = now;
+          oa_step = 14;
+        }
+      }
+      break;
+
+    case 14:
+      if (now - step_start >= 100) {
+        OA_mark = 0;
+        oa_step = 0;
+      }
+      break;
   }
 }
 

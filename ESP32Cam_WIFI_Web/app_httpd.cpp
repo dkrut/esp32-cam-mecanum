@@ -11,7 +11,7 @@
 
 extern int gpLed;
 Preferences wifiPrefs;
-byte txdata[4] = {0xAB, 0, 0, 0xFF};//{0xAB, 25, 0, 0xFF};{0xAB, 29, 0, 0xFF};{0xAB, 30, 0, 0xFF};
+
 const int Forward       = 163;                               // 前进
 const int Backward      = 92;                              // 后退
 const int Turn_Left     = 106;                              // 左平移
@@ -92,39 +92,7 @@ static esp_err_t capture_handler(httpd_req_t *req){
         return res;
     }
 
-    bool image_matrix = fmt2rgb888(fb->buf, fb->len, fb->format, out_buf);
-    if (!image_matrix) {
-        esp_camera_fb_return(fb);
-        Serial.println("dl_matrix3du_alloc failed");
-        httpd_resp_send_500(req);
-        return ESP_FAIL;
-    }
 
-    
-    out_len = fb->width * fb->height * 3;
-    out_width = fb->width;
-    out_height = fb->height;
-    out_buf = (uint8_t*)malloc(out_len);
-
-    s = fmt2rgb888(fb->buf, fb->len, fb->format, out_buf);
-    esp_camera_fb_return(fb);
-    if(!s){
-        free(out_buf);
-        Serial.println("to rgb888 failed");
-        httpd_resp_send_500(req);
-        return ESP_FAIL;
-    }
-
-    jpg_chunking_t jchunk = {req, 0};
-    s = fmt2jpg_cb(out_buf, out_len, out_width, out_height, PIXFORMAT_RGB888, 90, jpg_encode_stream, &jchunk);
-    free(out_buf);
-    if(!s){
-        Serial.println("JPEG compression failed");
-        return ESP_FAIL;
-    }
-
-    int64_t fr_end = esp_timer_get_time();
-    return res;
 }
 
 static esp_err_t stream_handler(httpd_req_t *req){
@@ -237,6 +205,7 @@ static esp_err_t cmd_handler(httpd_req_t *req)
     }
 
     int val = atoi(value);
+    byte txdata[4] = {0xAB, 0, 0, 0xFF};
     sensor_t * s = esp_camera_sensor_get();
     int res = 0;
     //Serial.println(variable);
